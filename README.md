@@ -5,6 +5,10 @@ cd to src
 go build -o ../bin/main.exe .
 
 #build docker image
+docker build -t my-second-go-app .
+
+#rebuld docker image (remove and reinstall)
+docker image rm --force my-second-go-app
 docker build -t my-second-go-app
 
 #run docker container in interactive mode and map port 8088 to 8083
