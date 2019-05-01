@@ -4,32 +4,50 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"	
+	"os"
 	"runtime"
 	"strconv"
 )
 
-var counter = 0
+var _counter = 0
+var _hostname = getHostName()
+var _executable = getExecutable()
+var _goos = runtime.GOOS
+var _goarch = runtime.GOARCH
+var _cpus = runtime.NumCPU()
 
-func main() {
-	fmt.Println("Go Docker Tutorial!")
+func default_handler(w http.ResponseWriter, r *http.Request) {
+	env_desc := fmt.Sprintf("%s - %s (%d-core): %s - %s", _goos, _goarch, _cpus, _hostname, _executable)
 
+	_counter++
+	fmt.Println("Handler called: " + strconv.Itoa(_counter))
+	fmt.Fprintf(w, "Hello World from ["+env_desc+"] - "+strconv.Itoa(_counter))
+}
+
+func getHostName() string {
 	hostname, err := os.Hostname()
+
 	if err != nil {
 		panic(err)
 	}
 
+	return hostname
+}
+
+func getExecutable() string {
 	executable, err := os.Executable()
+
 	if err != nil {
 		panic(err)
-	}	
+	}
 
-	env_desc := fmt.Sprintf("%s - %s (%d-core): %s - %s", runtime.GOOS, runtime.GOARCH, runtime.NumCPU(), hostname, executable)
+	return executable
+}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		counter++
-		fmt.Fprintf(w, "Hello World from ["+env_desc+"] - "+strconv.Itoa(counter))
-	})
+func main() {
+	fmt.Println("Go Docker Tutorial!")
+
+	http.HandleFunc("/", default_handler)
 
 	log.Fatal(http.ListenAndServe(":8088", nil))
 }
